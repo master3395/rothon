@@ -2,6 +2,7 @@ import requests
 import re
 import inspect
 from pyquery import PyQuery as pq
+import group
 import os
 
 pwd = os.path.dirname(os.path.realpath(__file__))
@@ -83,11 +84,11 @@ class User:
 			raise self.FetchError	
 
 	@need_ident
-	def get_group_rank(self, group):
-		if inspect.isclass(group):
-			pass
-		elif isinstance(group, int):
-			group_id = group
+	def get_group_rank(self, group_object):
+		if isinstance(group_object, group.Group):
+			group_id = group_object.get_id()
+		elif isinstance(group_object, int):
+			group_id = group_object
 		else:
 			raise Exception
 
@@ -99,11 +100,11 @@ class User:
 		return int(re.compile(r'(\d+)').search(r.text).group(1))
 
 	@need_ident
-	def get_group_role(self, group):
-		if inspect.isclass(group):
-			pass
-		elif isinstance(group, int):
-			group_id = group
+	def get_group_role(self, group_object):
+		if isinstance(group_object, group.Group):
+			group_id = group_object.get_id()
+		elif isinstance(group_object, int):
+			group_id = group_object
 		else:
 			raise Exception
 
@@ -133,6 +134,33 @@ class User:
 			raise self.FetchError
 
 		return r.url
+
+	@need_ident
+	def get_primary_group(self, return_group=False):
+		try:
+			if return_group:
+				return group.Group(self.primary_group['GroupId'])
+
+			return self.primary_group
+		except AttributeError:
+			r = requests.get("http://www.roblox.com/Groups/GetPrimaryGroupInfo.ashx?users=%s" % self.get_username())
+
+			j = r.json()
+			self.primary_group = j[self.get_username()]
+
+			if return_group:
+				return group.Group(self.primary_group['GroupId'])
+
+			return self.primary_group
+
+	def __unicode__(self):
+		try:
+			return self.get_username()
+		except AttributeError:
+			return "user-%s" % self.id
+
+	def __str__(self):
+		return unicode(self).encode('utf-8')
 
 	# @need_ident
 	# def get_groups(self):
