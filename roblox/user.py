@@ -63,11 +63,11 @@ class User:
 				raise self.UserDoesntExist
 
 	@need_ident
-	def in_group(self, group):
-		if inspect.isclass(group):
-			pass
-		elif isinstance(group, int):
-			group_id = group
+	def in_group(self, group_object):
+		if isinstance(group_object, group.Group):
+			group_id = group_object.get_id()
+		elif isinstance(group_object, int):
+			group_id = group_object
 		else:
 			raise Exception
 

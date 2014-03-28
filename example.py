@@ -11,7 +11,9 @@ user = roblox.user(username="Kenetec")
 
 print user.get_group_rank(group)
 
-print user.in_group(372)
+print user.get_primary_group(True)
+
+print user.in_group(group)
 
 print user.get_blurb()
 
